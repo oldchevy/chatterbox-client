@@ -4,7 +4,7 @@ app = {};
 app.messageIDs = {};
 app.server = 'https://api.parse.com/1/classes/messages';
 app.roomname = 'lobby';
-
+app.rooms = [];
 // var appendMessage = function(messageObj) {
 
 //   if (app.messageIDs[messageObj.objectId] || messageObj.text === undefined) {
@@ -20,19 +20,56 @@ app.roomname = 'lobby';
 
 //addMessage will append a message to the dom
 app.addMessage = function(messageObj) {
-  //debugger;
+  //console.log(messageObj);
+  //if its an html tag at all
+    //supress, don't push to messageObj
+  //else
+    //push to message obj
+    //if its in our current chat room
+      //display it
+
   if (messageObj.text && messageObj.text.match(/<(.*)>/gi)) {
     //console.log('User:', messageObj.username, 'Message:', messageObj.text);
   } else if (messageObj.username && messageObj.username.match(/<(.*)>/gi)) {
     //console.log('User:', messageObj.username, 'Message:', messageObj.text);
   } else if (app.messageIDs[messageObj.objectId] || !messageObj.text) {
   } else {
-    var element = $('<div>' + messageObj.username + ' says: ' + messageObj.text + '</div>');
-    $('#chats').prepend(element);    
-    app.messageIDs[messageObj.objectId] = messageObj.text;
-    console.log(messageObj);
+    if (messageObj.roomname === app.roomname) {
+      var element = $('<div><a class=' + messageObj.username + '>' + messageObj.username + '</a>' + ' says: ' + messageObj.text + '</div>');
+      $('#chats').prepend(element);      
+    }
+    if (app.rooms.indexOf(messageObj.roomname) === -1) {
+      //if roomname doesn't exist, create new one
+      app.rooms.push(messageObj.roomname);
+      app.addRoom(messageObj.roomname);
+    }
+    app.messageIDs[messageObj.objectId] = messageObj;
+    //console.log(messageObj);
   }
 };
+
+app.addHandler = function(obj) {
+  $(this).on('click', function(event) {
+
+    var uName = $(this).className();
+    $('a.' + uName).toggleClass('friend');
+    app.appFriend($(this));
+  });
+};
+
+app.addFriend = function() {
+
+};
+
+app.repopulateRoom = function() {
+  for (var message in app.messageIDs) {
+    if (app.messageIDs[message].roomname === app.roomname) {
+      var element = $('<div><a class=' + app.messageIDs[message].username + '>' + app.messageIDs[message].username + '</a> says: ' + app.messageIDs[message].text + '</div>');
+      $('#chats').prepend(element);    
+    }
+  }
+};
+
 
 //fetch will get a message object from the server
 app.fetch = function() {
@@ -55,19 +92,29 @@ app.fetch = function() {
 app.init = function() {
 
   $(document).ready(function() {
-
-    //add click handler for submit button
-    $('#send .submit').on('click', function(event) {
+    // add click handler for submit button
+    $('#send .submit').off().on('click', function(event) {
       event.preventDefault();
-      app.handleSubmit();    
+      app.handleSubmit();
     });
 
+    // $('.submit').off().on('submit', function(event) {
+    //   event.stopPropagation();
+    //   app.handleSubmit();
+    // });
+
     //add click handler for adding rooms
-    $('#roomSelect .addRoomSubmit').on('click', function(event) {
+    $('#allRooms .addRoomSubmit').on('click', function(event) {
       event.preventDefault();
       app.addRoom($('#addRoom').val());
     });
 
+    //add click handler for changing rooms
+    $(document).on('change', '#roomSelect', function(event) {
+      app.clearMessages();
+      app.roomname = $(this).val();
+      app.repopulateRoom();
+    });
     //$()
 
     setInterval(app.fetch, 1000);
@@ -93,18 +140,26 @@ app.clearMessages = function() {
 
 //add a room to the dom
 app.addRoom = function(roomName) {
-  //check if room exists already
-  //if (document.getElementsByClassName(1)
-  //make another room with a name that matches roomName
-  var newRoom = $('<div class=' + roomName + '>' + roomName + '</div>');
-  $('#roomSelect').append(newRoom);
+  
+  var bool = false;
+  $('option').each(function(child) {
+    if ($(this).text() === roomName) {
+      bool = true;
+    }
+  });
+
+  if (!bool) {
+    var newRoom = $('<option value=' + roomName + '>' + roomName + '</option>');
+    $('#roomSelect').append(newRoom);
+  }
 };
+
 
 app.handleSubmit = function() {
   var nextMessage = {};
   nextMessage.text = $('#send #message').val();
   nextMessage.username = window.location.search.split('=')[1];
-  nextMessage.roomname = 'lobby';
+  nextMessage.roomname = app.roomname;
 
   app.send(nextMessage); 
 };

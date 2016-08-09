@@ -88,8 +88,7 @@ describe('chatterbox', function() {
 
       it('should be able to add rooms to the DOM', function() {
         app.addRoom('superLobby');
-
-        expect($('#roomSelect').children().length).to.equal(1);
+        expect($('#roomSelect').children().length).to.equal(2);
       });
 
     });
@@ -118,7 +117,10 @@ describe('chatterbox', function() {
         $('#message').val('Why so many Mel Brooks quotes?');
 
         app.init();
-        $('#send .submit').trigger('submit');
+        $('#send .submit').trigger('click');
+
+        console.log(app.handleSubmit.callCount);
+
         expect(app.handleSubmit.calledOnce).to.be.true;
 
         app.handleSubmit.restore();
