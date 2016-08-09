@@ -5,6 +5,7 @@ app.messageIDs = {};
 app.server = 'https://api.parse.com/1/classes/messages';
 app.roomname = 'lobby';
 app.rooms = [];
+app.friends = [];
 // var appendMessage = function(messageObj) {
 
 //   if (app.messageIDs[messageObj.objectId] || messageObj.text === undefined) {
@@ -27,6 +28,11 @@ app.addMessage = function(messageObj) {
     //push to message obj
     //if its in our current chat room
       //display it
+  if (messageObj.username) {
+    messageObj.username = messageObj.username.replace(/\s/g, '_');
+    messageObj.username = messageObj.username.replace(/[^a-z0-9]/gi, '');    
+  }
+
 
   if (messageObj.text && messageObj.text.match(/<(.*)>/gi)) {
     //console.log('User:', messageObj.username, 'Message:', messageObj.text);
@@ -35,7 +41,9 @@ app.addMessage = function(messageObj) {
   } else if (app.messageIDs[messageObj.objectId] || !messageObj.text) {
   } else {
     if (messageObj.roomname === app.roomname) {
-      var element = $('<div><a class=' + messageObj.username + '>' + messageObj.username + '</a>' + ' says: ' + messageObj.text + '</div>');
+      var element = $('<div><a class=' + messageObj.username + '>' + messageObj.username + '</a>' + ': ' + messageObj.text + '</div>');
+      element.addClass('friend');
+      app.addHandler.call(element);
       $('#chats').prepend(element);      
     }
     if (app.rooms.indexOf(messageObj.roomname) === -1) {
@@ -48,23 +56,40 @@ app.addMessage = function(messageObj) {
   }
 };
 
-app.addHandler = function(obj) {
+app.addHandler = function() {
   $(this).on('click', function(event) {
-
-    var uName = $(this).className();
-    $('a.' + uName).toggleClass('friend');
-    app.appFriend($(this));
+    var classes = this.children[0].className.split(' ');
+    var uName;
+    classes.forEach(function(oneClass) {
+      if (oneClass !== 'friends') {
+        uName = oneClass;
+      }
+    });
+    // $('a.' + uName).toggleClass('friends');
+    $('.' + uName).toggleClass('friends');
+    app.addFriend(uName);
   });
 };
 
-app.addFriend = function() {
-
+app.addFriend = function(name) {
+  var index = app.friends.indexOf(name);
+  if (index === -1) {
+    app.friends.push(name);
+  } else {
+    app.friends.splice(index, 1);
+  }
 };
 
 app.repopulateRoom = function() {
   for (var message in app.messageIDs) {
     if (app.messageIDs[message].roomname === app.roomname) {
-      var element = $('<div><a class=' + app.messageIDs[message].username + '>' + app.messageIDs[message].username + '</a> says: ' + app.messageIDs[message].text + '</div>');
+      var element = $('<div><a class=' + app.messageIDs[message].username + '>' + app.messageIDs[message].username + '</a>: ' + app.messageIDs[message].text + '</div>');
+      element.addClass('friend');
+      if (app.friends.indexOf(app.messageIDs[message].username) !== -1) {
+        debugger;
+        $(element.children()[0]).addClass('friends');
+      }
+      app.addHandler.call(element);
       $('#chats').prepend(element);    
     }
   }
@@ -165,4 +190,22 @@ app.handleSubmit = function() {
 };
 
 app.init();
+
+
+// var evilMessage = {
+//   text: 'Hahahaha!',
+//   username: 'Dexter',
+//   roomname: '<script>$("body").css("background-color", "red")</script>'
+// };
+
+// $.ajax({
+//   type: 'POST',
+//   url: 'https://api.parse.com/1/classes/messages',
+//   data: JSON.stringify(evilMessage),
+//   contentType: 'application/json',
+//   success: function() { console.log('HACKED'); },
+//   error: function(data) { console.log('Sending has failed'); }
+// });
+
+
 
