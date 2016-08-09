@@ -12,10 +12,31 @@
     <script src="scripts/app.js"></script>
   </head>
   <body>
+
+
     <div id="main">
       <h1>chatterbox</h1>
       <!-- Your HTML goes here! -->
+      <form id='send'>
+        <input type='text' id='message'>
+        <button type="submit" class='submit'>Submit</button>      
+      </form>
+
+      <div id='roomSelect'>
+        <input type='text' id='addRoom'>
+        <button type='submit' class='addRoomSubmit'>Add Room</button>
+        <select id='allRooms'>
+          <option value="lobby">Volvo</option>
+          <option value="4chan">Saab</option>
+          <option value="test">Mercedes</option>
+        </select>
+        <!-- add room stuff here -->
+      </div>
     </div>
+
     <div id="chats"></div>
+ 
+
+
   </body>
 </html>
