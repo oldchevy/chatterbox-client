@@ -28,32 +28,76 @@ app.addMessage = function(messageObj) {
     //push to message obj
     //if its in our current chat room
       //display it
+
+  if (!app.findEvil(messageObj)) {
+    if (app.messageIDs[messageObj.objectId] || !messageObj.text) {
+    } else {
+      if (messageObj.roomname === app.roomname) {
+        var element = $('<div><a class=' + messageObj.username + '>' + messageObj.username + '</a>' + ': ' + messageObj.text + '</div>');
+        element.addClass('friend');
+        app.addHandler.call(element);
+        $('#chats').prepend(element);      
+      }
+      if (app.rooms.indexOf(messageObj.roomname) === -1) {
+        //if roomname doesn't exist, create new one
+        app.rooms.push(messageObj.roomname);
+        app.addRoom(messageObj.roomname);
+      }
+      app.messageIDs[messageObj.objectId] = messageObj;
+      //console.log(messageObj);
+    }
+  }
+
+  // if (messageObj.username) {
+  //   messageObj.username = messageObj.username.replace(/\s/g, '_');
+  //   messageObj.username = messageObj.username.replace(/[^a-z0-9]/gi, '');    
+  // }
+
+
+  // if (messageObj.text && messageObj.text.match(/<(.*)>/gi)) {
+  //   //console.log('User:', messageObj.username, 'Message:', messageObj.text);
+  // } else if (messageObj.username && messageObj.username.match(/<(.*)>/gi)) {
+  //   //console.log('User:', messageObj.username, 'Message:', messageObj.text);
+  // } else if (app.messageIDs[messageObj.objectId] || !messageObj.text) {
+  // } else {
+  //   if (messageObj.roomname === app.roomname) {
+  //     var element = $('<div><a class=' + messageObj.username + '>' + messageObj.username + '</a>' + ': ' + messageObj.text + '</div>');
+  //     element.addClass('friend');
+  //     app.addHandler.call(element);
+  //     $('#chats').prepend(element);      
+  //   }
+  //   if (app.rooms.indexOf(messageObj.roomname) === -1) {
+  //     //if roomname doesn't exist, create new one
+  //     app.rooms.push(messageObj.roomname);
+  //     app.addRoom(messageObj.roomname);
+  //   }
+  //   app.messageIDs[messageObj.objectId] = messageObj;
+  //   //console.log(messageObj);
+  // }
+};
+
+app.findEvil = function(messageObj) {
+  var bool = false;
+
   if (messageObj.username) {
     messageObj.username = messageObj.username.replace(/\s/g, '_');
     messageObj.username = messageObj.username.replace(/[^a-z0-9]/gi, '');    
   }
 
-
   if (messageObj.text && messageObj.text.match(/<(.*)>/gi)) {
-    //console.log('User:', messageObj.username, 'Message:', messageObj.text);
-  } else if (messageObj.username && messageObj.username.match(/<(.*)>/gi)) {
-    //console.log('User:', messageObj.username, 'Message:', messageObj.text);
-  } else if (app.messageIDs[messageObj.objectId] || !messageObj.text) {
-  } else {
-    if (messageObj.roomname === app.roomname) {
-      var element = $('<div><a class=' + messageObj.username + '>' + messageObj.username + '</a>' + ': ' + messageObj.text + '</div>');
-      element.addClass('friend');
-      app.addHandler.call(element);
-      $('#chats').prepend(element);      
-    }
-    if (app.rooms.indexOf(messageObj.roomname) === -1) {
-      //if roomname doesn't exist, create new one
-      app.rooms.push(messageObj.roomname);
-      app.addRoom(messageObj.roomname);
-    }
-    app.messageIDs[messageObj.objectId] = messageObj;
-    //console.log(messageObj);
+    bool = true;
   }
+
+  if (messageObj.username && messageObj.username.match(/<(.*)>/gi)) {
+    bool = true;
+  }
+  if (messageObj.roomname && messageObj.roomname.match(/<(.*)>/gi)) {
+    bool = true;
+  }
+
+
+  return bool;
+
 };
 
 app.addHandler = function() {
@@ -191,21 +235,6 @@ app.handleSubmit = function() {
 
 app.init();
 
-
-// var evilMessage = {
-//   text: 'Hahahaha!',
-//   username: 'Dexter',
-//   roomname: '<script>$("body").css("background-color", "red")</script>'
-// };
-
-// $.ajax({
-//   type: 'POST',
-//   url: 'https://api.parse.com/1/classes/messages',
-//   data: JSON.stringify(evilMessage),
-//   contentType: 'application/json',
-//   success: function() { console.log('HACKED'); },
-//   error: function(data) { console.log('Sending has failed'); }
-// });
 
 
 
