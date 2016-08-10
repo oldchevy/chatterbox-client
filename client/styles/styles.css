@@ -69,6 +69,10 @@ a {
     font-weight: bold;
 }
 
+a:hover {
+    text-decoration: underline;
+}
+
 .friend:hover {
     background-color: #ddd;
 }
@@ -97,6 +101,11 @@ a {
 
     margin-top: 5px;
 
+}
 
+.time {
+    float: right;
+    font-style: italic;
+    font-size: small;
 }
 

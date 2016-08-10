@@ -22,10 +22,7 @@ app.addMessage = function(messageObj) {
 
       //Append a new element if the message is in the current chat room
       if (messageObj.roomname === app.roomname) {
-        var element = $('<div><a class=' + messageObj.username + '>' + messageObj.username + '</a>' + ': ' + messageObj.text + '</div>');
-        element.addClass('friend');
-        app.addHandler.call(element);
-        $('#chats').prepend(element);      
+        app.append(messageObj);    
       }
 
       //Add a new roomname if it hasn't been seen before
@@ -118,22 +115,32 @@ app.repopulateRoom = function() {
   for (var message in app.messageIDs) {
     //Only append messages for the current roomname
     if (app.messageIDs[message].roomname === app.roomname) {
-      //Make the new tag and append it
-      var element = $('<div><a class=' + app.messageIDs[message].username + '>' + app.messageIDs[message].username + '</a>: ' + app.messageIDs[message].text + '</div>');
-      element.addClass('friend');
-
-      //Re-render your current friends
-      if (app.friends.indexOf(app.messageIDs[message].username) !== -1) {
-        $(element.children()[0]).addClass('friends');
-      }
-
-      //Add the handler, and prepend to DOM
-      app.addHandler.call(element);
-      $('#chats').prepend(element);    
+      app.append(app.messageIDs[message]);   
     }
   }
 };
 
+//Takes a message object and renders it correctly to DOM
+app.append = function(nextMessage) {
+  
+  //Make the jQuery element, with Moments
+  var momentTime = moment(new Date(nextMessage.createdAt)).fromNow();
+  var element = $('<div><a class=' + nextMessage.username + '>'
+                   + nextMessage.username + '</a>: ' 
+                   + nextMessage.text 
+                   + '<span class=time>' + momentTime + '</span>'
+                   + '</div>');
+  element.addClass('friend');
+
+  //Re-render your current friends
+  if (app.friends.indexOf(nextMessage.username) !== -1) {
+    $(element.children()[0]).addClass('friends');
+  }
+
+  //Add the handler, and prepend to DOM
+  app.addHandler.call(element);
+  $('#chats').prepend(element);    
+};
 
 
 //clear messages from the dom (called in the roomChange event listener)
@@ -144,10 +151,10 @@ app.clearMessages = function() {
 
 
 //add a room to the dom, is called in addMessage (line 34)
+//Also called in the add room button eventt listener inside init
 app.addRoom = function(roomName) {
   
   //Double check if the room isn't already appended
-  //Is this necessary?
   var bool = false;
   $('option').each(function(child) {
     if ($(this).text() === roomName) {
@@ -169,7 +176,11 @@ app.fetch = function() {
   $.ajax({
     url: app.server,
     success: function(obj) {
-      //Call addMessage on each message object
+      //Reverses ordering for initial prepend
+      obj.results.sort(function(a, b) {
+        return new Date(a.createdAt) - new Date(b.createdAt);
+      });
+      //Calls addMessage on each message returned from the request
       obj.results.forEach(function(oneMessage) {
         app.addMessage(oneMessage);
       });
