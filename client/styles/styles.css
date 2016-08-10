@@ -5,8 +5,8 @@ body {
     font-family: arial, sans-serif;
 }
 
-#main, #chats {
-    width: 500px;
+#main, #chats, #tabs {
+    width: 700px;
     margin: auto;
     text-align: left;
     background: white;
@@ -59,10 +59,11 @@ form input[type=text] {
     padding: 5px;
 }
 
-.friend {
+.friend, .tab {
     padding: 5px;
     margin-bottom: 5px;
     background-color: #eee;
+    word-wrap: break-word;
 }
 
 a {
@@ -73,7 +74,7 @@ a:hover {
     text-decoration: underline;
 }
 
-.friend:hover {
+.friend:hover, .tab:hover {
     background-color: #ddd;
 }
 
@@ -107,5 +108,16 @@ a:hover {
     float: right;
     font-style: italic;
     font-size: small;
+}
+#tabs {
+    height: 10px;
+}
+.tab {
+    float: left;
+    margin-right: 3px;
+}
+
+.tab.clicked {
+    background-color: #bbb;
 }
 

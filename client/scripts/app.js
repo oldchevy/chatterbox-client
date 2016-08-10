@@ -6,6 +6,7 @@ app.server = 'https://api.parse.com/1/classes/messages';
 app.roomname = 'lobby';
 app.rooms = [];
 app.friends = [];
+app.tabList = [];
 app.localUser = 'anonymous';
 
 
@@ -126,7 +127,7 @@ app.append = function(nextMessage) {
   //Make the jQuery element, with Moments
   var momentTime = moment(new Date(nextMessage.createdAt)).fromNow();
   var element = $('<div><a class=' + nextMessage.username + '>'
-                   + nextMessage.username + '</a>: ' 
+                   + nextMessage.username + ':<br></a> ' 
                    + nextMessage.text 
                    + '<span class=time>' + momentTime + '</span>'
                    + '</div>');
@@ -167,6 +168,9 @@ app.addRoom = function(roomName) {
     var newRoom = $('<option value=' + roomName + '>' + roomName + '</option>');
     $('#roomSelect').append(newRoom);
   }
+
+  //Clear out form field
+  $('#allRooms #addRoom').val('');
 };
 
 
@@ -186,7 +190,8 @@ app.fetch = function() {
       });
     },
     error: function() { console.log('GET request has failed'); },
-    type: 'GET'
+    type: 'GET',
+    data: 'sort="-createdAt"'
   });
   
 };
@@ -201,12 +206,36 @@ app.send = function(messageObj) {
     url: app.server,
     data: JSON.stringify(messageObj),
     contentType: 'application/json',
-    success: function() { console.log('Send was a success: ' + messageObj.username); },
+    success: function() {
+      console.log('Send was a success: ' + messageObj.username);
+      $('#send #message').val('');
+      app.addTab();
+    },
     error: function(data) { console.log('Sending has failed', data); }
   });
 
 };
 
+
+//Makes a tab and attaches the click handler for it
+app.addTab = function() {
+  
+  //Check if the tab is not already open
+  if (!app.tabList.includes(app.roomname)) {
+    app.tabList.push(app.roomname);
+    var workingTab = $('<div class=tab>' + app.roomname + '</div>');
+    $('#tabs').append(workingTab);
+
+    //Event handler for styling and repopulating the chat area
+    workingTab.on('click', function(event) {
+      $('#tabs').children().removeClass('clicked');
+      $(this).addClass('clicked');
+      app.roomname = $(this).text();
+      app.clearMessages();
+      app.repopulateRoom();
+    });
+  }
+};
 
 
 //initializes the app
@@ -234,7 +263,7 @@ app.init = function() {
     });
 
     //Messages refresh every one second
-    setInterval(app.fetch, 1000);
+    setInterval(app.fetch, 3000);
   });
 };
 
