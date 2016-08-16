@@ -2,7 +2,7 @@
 //including cached messages
 app = {};
 app.messageIDs = {};
-app.server = 'https://api.parse.com/1/classes/messages';
+app.server = 'http://127.0.0.1:3000/classes/messages';
 app.roomname = 'lobby';
 app.rooms = [];
 app.friends = [];
@@ -175,6 +175,7 @@ app.fetch = function() {
 
   $.ajax({
     url: app.server,
+    dataType: 'json',
     success: function(obj) {
       //Reverses ordering for initial prepend
       obj.results.sort(function(a, b) {
