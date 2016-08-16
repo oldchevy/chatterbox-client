@@ -192,7 +192,7 @@ app.fetch = function() {
     },
     error: function() { console.log('GET request has failed'); },
     type: 'GET',
-    data: 'sort="-createdAt"'
+    //data: 'sort="-createdAt"'
   });
   
 };
